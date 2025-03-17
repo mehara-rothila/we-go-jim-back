@@ -1,20 +1,11 @@
-# WE GO JIM - Complete Documentation
+# WE GO JIM - Backend Documentation
 
-## Project Overview
+## Overview
 
-WE GO JIM is a modern workout tracking application that helps users monitor their fitness journey, track workouts, and analyze progress over time. The application features a dark/light theme toggle, responsive design, and intuitive workout schedule management.
-
-## System Architecture
-
-The application follows a client-server architecture:
-
-- **Frontend**: React-based SPA (Single Page Application) using Vite as the build tool
-- **Backend**: Express.js REST API server
-- **Database**: MongoDB for data persistence
+The WE GO JIM backend is built as a RESTful API service using Express.js and MongoDB. It provides secure user authentication and comprehensive workout schedule management functionality.
 
 ## Directory Structure
 
-### Backend Structure
 ```
 backend/
 ├── config/
@@ -34,65 +25,8 @@ backend/
 └── server.js                # Main server entry point
 ```
 
-### Frontend Structure
-```
-frontend/
-├── node_modules/            # Dependencies
-├── public/                  # Static assets
-├── src/
-│   ├── assets/              # Images, fonts, etc.
-│   ├── components/
-│   │   ├── common/
-│   │   │   └── LoadingScreen.jsx  # Loading indicator component
-│   │   ├── features/              # Feature-specific components
-│   │   ├── hooks/                 # Custom React hooks
-│   │   │   └── useWorkouts.js     # Hook for workout data management
-│   │   ├── layout/
-│   │   │   ├── Layout.jsx         # Main layout wrapper
-│   │   │   ├── Navbar.jsx         # Top navigation bar
-│   │   │   └── Sidebar.jsx        # Side navigation menu
-│   │   ├── store/slices/
-│   │   │   └── workoutSlice.js    # State management for workouts
-│   │   └── workouts/
-│   │       └── EditScheduleModal.jsx  # Modal for editing schedules
-│   ├── context/
-│   │   ├── AuthContext.jsx        # Authentication context provider
-│   │   └── ThemeContext.jsx       # Theme context provider
-│   ├── data/
-│   │   └── workoutData.js         # Static workout data
-│   ├── hooks/                     # Application-wide custom hooks
-│   ├── pages/
-│   │   ├── Dashboard.jsx          # Dashboard page
-│   │   ├── Exercises.jsx          # Exercise library page
-│   │   ├── Login.jsx              # Login page
-│   │   ├── Profile.jsx            # User profile page
-│   │   ├── Register.jsx           # Registration page
-│   │   ├── Stats.jsx              # Statistics page
-│   │   └── Workouts.jsx           # Workout schedules page
-│   ├── services/
-│   │   └── api.js                 # API service for backend communication
-│   ├── utils/                     # Utility functions
-│   ├── App.css                    # Global styles
-│   ├── App.jsx                    # Main application component
-│   ├── index.css                  # Entry CSS file
-│   └── main.jsx                   # Application entry point
-└── .gitignore                     # Git ignore file
-```
-
 ## Tech Stack
 
-### Frontend Technologies
-- **React**: UI library for building the user interface
-- **Vite**: Build tool for fast development and optimized production builds
-- **React Router DOM**: For client-side routing
-- **Axios**: HTTP client for API communication
-- **Tailwind CSS**: Utility-first CSS framework for styling
-- **Lucide React**: Icon library
-- **React Hook Form**: Form handling and validation
-- **React Context API**: State management
-- **Recharts**: For data visualization charts
-
-### Backend Technologies
 - **Node.js**: JavaScript runtime environment
 - **Express.js**: Web application framework
 - **MongoDB**: NoSQL database for data storage
@@ -214,82 +148,8 @@ const scheduleSchema = new mongoose.Schema({
    - If valid, server generates a JWT token and returns it with user data
 
 3. **Authentication**:
-   - Frontend stores JWT token in localStorage
-   - Token is included in Authorization header for protected requests
+   - Token is expected in Authorization header for protected requests
    - Backend middleware validates token for protected routes
-
-## Context Providers
-
-### AuthContext
-Manages authentication state throughout the application:
-- User data storage
-- Login/Register functions
-- Token management
-- Authentication state
-
-```javascript
-// Key functions
-const register = async (name, email, password) => {...}
-const login = async (email, password) => {...}
-const logout = () => {...}
-```
-
-### ThemeContext
-Manages the application theme (dark/light mode):
-- Theme state storage
-- Theme toggle functionality
-- Theme persistence
-
-```javascript
-// Key functions
-const toggleTheme = () => {...}
-```
-
-## Custom Hooks
-
-### useSchedules
-Centralizes workout schedule management:
-- Fetching all schedules
-- Adding a new schedule
-- Error and loading states
-
-```javascript
-// Usage
-const { schedules, loading, error, fetchSchedules, addSchedule } = useSchedules();
-```
-
-## Components
-
-### Layout Components
-- **Layout**: Main layout wrapper with Navbar and Sidebar
-- **Navbar**: Top navigation bar with theme toggle and user menu
-- **Sidebar**: Navigation menu for accessing different pages
-
-### Workout Components
-- **EditScheduleModal**: Modal for editing workout schedules
-  - Allows editing days, exercises, sets and reps
-
-### Common Components
-- **LoadingScreen**: Loading indicator for async operations
-
-## Pages
-
-### Authentication Pages
-- **Login**: User login form
-- **Register**: New user registration form
-
-### Main Content Pages
-- **Dashboard**: Overview of workout statistics and progress
-  - Muscle group progress visualization
-  - Recent workouts display
-  - Key workout metrics
-- **Workouts**: Manage workout schedules
-  - Create, read, update, delete schedules
-  - Search through schedules
-- **Exercises**: Browse exercise library
-  - Filter exercises by category and equipment
-- **Stats**: View detailed workout statistics (in development)
-- **Profile**: User profile management (in development)
 
 ## Setup Instructions
 
@@ -306,7 +166,8 @@ MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/we-go-jim
 JWT_SECRET=your_jwt_secret_key
 ```
 
-### Backend Setup
+### Installation
+
 1. Navigate to backend directory:
 ```bash
 cd backend
@@ -326,22 +187,6 @@ npm start
 npm run dev
 ```
 
-### Frontend Setup
-1. Navigate to frontend directory:
-```bash
-cd frontend
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Start development server:
-```bash
-npm run dev
-```
-
 ### Password Reset Utility
 If you need to reset a user's password:
 1. Modify the `reset-password.js` script with the target email
@@ -354,18 +199,8 @@ node reset-password.js
 
 ### Code Style
 - Follow ESLint/Prettier configurations
-- Use functional components with hooks
 - Implement proper error handling
-
-### State Management
-- Use React Context for global state
-- Use component state for local UI state
-- Use custom hooks for reusable state logic
-
-### Performance Optimization
-- Implement proper memoization (useCallback, useMemo)
-- Optimize re-renders
-- Lazy load components when appropriate
+- Use async/await for asynchronous operations
 
 ### Security Best Practices
 - Store sensitive data in environment variables
@@ -373,30 +208,17 @@ node reset-password.js
 - Use HTTP-only cookies for sensitive data
 - Implement proper CORS configuration
 
+### Database Best Practices
+- Implement proper indexing for frequently queried fields
+- Use data validation at the model level
+- Implement proper error handling for database operations
+
 ## Deployment
 
 ### Backend Deployment
 1. Set up a MongoDB Atlas cluster
 2. Configure environment variables
 3. Deploy to a Node.js hosting service (Heroku, Vercel, etc.)
-
-### Frontend Deployment
-1. Build the production bundle:
-```bash
-npm run build
-```
-2. Deploy the `dist` directory to a static hosting service (Netlify, Vercel, etc.)
-
-## Future Development
-
-### Planned Features
-1. **Exercise Database**: Comprehensive exercise library with instructions
-2. **Progress Tracking**: Visual charts showing progress over time
-3. **Workout Timer**: Integrated timer for tracking workout duration
-4. **Personal Records**: Track personal bests for exercises
-5. **Nutrition Tracking**: Basic calorie and macronutrient tracking
-6. **Social Features**: Share workouts and achievements
-7. **Mobile App**: Native mobile experience
 
 ## Troubleshooting
 
@@ -408,14 +230,9 @@ npm run build
 - Verify connection string is correct
 
 #### Authentication Issues
-- Clear localStorage and try logging in again
 - Check for proper JWT token configuration
 - Verify token expiration settings
-
-#### Frontend Build Issues
-- Clear node_modules and reinstall dependencies
-- Verify compatible Node.js version
-- Check for any lint or build errors
+- Ensure secret key is properly set
 
 ## Maintenance
 
@@ -433,7 +250,7 @@ npm update
 ### Monitoring
 - Implement error logging
 - Monitor API performance
-- Track user engagement metrics
+- Track server health metrics
 
 ---
 
@@ -442,4 +259,4 @@ This project is proprietary and confidential. Unauthorized copying, distribution
 
 ---
 
-*Documentation last updated: March 12, 2025*
+*Documentation last updated: March 17, 2025*
