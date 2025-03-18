@@ -41,6 +41,7 @@ mongoose.connection.on('connected', () => {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/schedules', require('./routes/schedule'));
 app.use('/api/stats', require('./routes/stats'));
+app.use('/api/exercises', require('./routes/exercise'));
 
 // Error handling middleware
 app.use(errorHandler);
