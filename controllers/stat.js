@@ -1,11 +1,10 @@
-// routes/stats.js
-const express = require('express');
-const router = express.Router();
-const { protect } = require('../middleware/auth');
+// controllers/stats.js
 const Schedule = require('../models/Schedule');
 
-// Weekly summary endpoint
-router.get('/weekly-summary', protect, async (req, res) => {
+// @desc   Get weekly performance summary
+// @route  GET /api/stats/weekly-summary
+// @access Private
+exports.getWeeklySummary = async (req, res) => {
     try {
         // Get all schedules for the user
         const schedules = await Schedule.find({ userId: req.user.id });
@@ -50,10 +49,12 @@ router.get('/weekly-summary', protect, async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error getting weekly summary' });
     }
-});
+};
 
-// Monthly summary endpoint
-router.get('/monthly-summary', protect, async (req, res) => {
+// @desc   Get monthly performance summary
+// @route  GET /api/stats/monthly-summary
+// @access Private
+exports.getMonthlySummary = async (req, res) => {
     try {
         // Get all schedules for the user
         const schedules = await Schedule.find({ userId: req.user.id });
@@ -99,10 +100,12 @@ router.get('/monthly-summary', protect, async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error getting monthly summary' });
     }
-});
+};
 
-// Performance metrics endpoint
-router.get('/performance-metrics', protect, async (req, res) => {
+// @desc   Get performance metrics
+// @route  GET /api/stats/performance-metrics
+// @access Private
+exports.getPerformanceMetrics = async (req, res) => {
     try {
         // Get all schedules for the user
         const schedules = await Schedule.find({ userId: req.user.id });
@@ -149,6 +152,4 @@ router.get('/performance-metrics', protect, async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error getting performance metrics' });
     }
-});
-
-module.exports = router;
+};

@@ -9,6 +9,11 @@ const setSchema = new mongoose.Schema({
     reps: {
         type: Number,
         required: true
+    },
+    weight: {
+        type: Number,
+        required: false,
+        default: 0
     }
 });
 

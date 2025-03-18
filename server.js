@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const errorHandler = require('./middleware/errorHandler');
 
 // Load env vars
 dotenv.config();
@@ -39,6 +40,10 @@ mongoose.connection.on('connected', () => {
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/schedules', require('./routes/schedule'));
+app.use('/api/stats', require('./routes/stats'));
+
+// Error handling middleware
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
