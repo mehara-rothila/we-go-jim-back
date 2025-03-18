@@ -2,7 +2,7 @@
 
 ## Overview
 
-The WE GO JIM backend is built as a RESTful API service using Express.js and MongoDB. It provides secure user authentication and comprehensive workout schedule management functionality.
+The WE GO JIM backend is built as a RESTful API service using Express.js and MongoDB. It provides secure user authentication, comprehensive workout schedule management, exercise library functionality, and performance analytics.
 
 ## Directory Structure
 
@@ -11,17 +11,25 @@ backend/
 ├── config/
 │   └── db.js                # Database configuration
 ├── middleware/
-│   └── auth.js              # JWT authentication middleware
+│   ├── auth.js              # JWT authentication middleware
+│   └── errorHandler.js      # Global error handling middleware
 ├── models/
 │   ├── Schedule.js          # Schedule data model
-│   └── User.js              # User data model
+│   ├── User.js              # User data model
+│   └── Exercise.js          # Exercise data model
+├── controllers/
+│   ├── auth.js              # Authentication controller
+│   ├── schedule.js          # Schedule management controller
+│   ├── stats.js             # Performance statistics controller
+│   └── exercise.js          # Exercise library controller
 ├── routes/
 │   ├── auth.js              # Authentication routes
-│   └── schedule.js          # Workout schedule routes
+│   ├── schedule.js          # Workout schedule routes
+│   ├── stats.js             # Performance statistics routes
+│   └── exercise.js          # Exercise library routes
 ├── .env                     # Environment variables
 ├── package-lock.json        # Dependency lock file
 ├── package.json             # Project metadata & dependencies
-├── reset-password.js        # Utility script for password reset
 └── server.js                # Main server entry point
 ```
 
@@ -115,6 +123,80 @@ const scheduleSchema = new mongoose.Schema({
 });
 ```
 
+### Exercise Model
+```javascript
+const exerciseSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    category: {
+        type: String,
+        required: true,
+        enum: ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Core']
+    },
+    equipment: {
+        type: String,
+        required: true
+    },
+    difficulty: {
+        type: String,
+        required: true,
+        enum: ['Beginner', 'Intermediate', 'Advanced']
+    },
+    description: {
+        type: String,
+        default: ''
+    },
+    isDefault: {
+        type: Boolean,
+        default: false
+    }
+}, {
+    timestamps: true
+});
+```
+
+## Key Features
+
+### Auto-Seeding Exercise Library
+The application automatically populates the database with a set of default exercises when a user first accesses the exercise library. This ensures that every new installation of the application comes with pre-populated exercise data, making it ready to use immediately.
+
+```javascript
+// Default exercises to seed
+const defaultExercises = [
+    {
+        name: 'Bench Press',
+        category: 'Chest',
+        equipment: 'Barbell',
+        difficulty: 'Intermediate',
+        description: 'A compound exercise that primarily targets the chest, shoulders, and triceps.',
+        isDefault: true
+    },
+    // Additional default exercises...
+];
+
+// Seed default exercises if none exist
+const seedDefaultExercises = async () => {
+    try {
+        const count = await Exercise.countDocuments();
+        if (count === 0) {
+            await Exercise.insertMany(defaultExercises);
+            console.log('Default exercises seeded successfully');
+        }
+    } catch (error) {
+        console.error('Error seeding default exercises:', error);
+    }
+};
+```
+
+### Performance Analytics
+The backend calculates comprehensive workout statistics and metrics for detailed performance analysis:
+- Weekly workout summaries
+- Monthly performance trends
+- Key performance indicators and metrics
+
 ## API Endpoints
 
 ### Authentication Endpoints
@@ -133,6 +215,24 @@ const scheduleSchema = new mongoose.Schema({
 | POST   | /api/schedules         | Create a new schedule     | `{ name, workouts }`          | `{ _id, name, workouts, ... }`         |
 | PUT    | /api/schedules/:id     | Update a schedule         | `{ name?, workouts? }`        | `{ _id, name, workouts, ... }`         |
 | DELETE | /api/schedules/:id     | Delete a schedule         | -                             | `{ message: "Schedule deleted" }`       |
+
+### Exercise Endpoints
+
+| Method | Endpoint               | Description               | Request Body                   | Response                                 |
+|--------|------------------------|---------------------------|-------------------------------|------------------------------------------|
+| GET    | /api/exercises         | Get all exercises         | -                             | `[{ _id, name, category, ... }]`        |
+| GET    | /api/exercises/:id     | Get single exercise       | -                             | `{ _id, name, category, ... }`         |
+| POST   | /api/exercises         | Create a new exercise     | `{ name, category, ... }`     | `{ _id, name, category, ... }`         |
+| PUT    | /api/exercises/:id     | Update an exercise        | `{ name?, category?, ... }`   | `{ _id, name, category, ... }`         |
+| DELETE | /api/exercises/:id     | Delete an exercise        | -                             | `{ message: "Exercise deleted" }`       |
+
+### Statistics Endpoints
+
+| Method | Endpoint                        | Description                | Response                                 |
+|--------|--------------------------------|----------------------------|------------------------------------------|
+| GET    | /api/stats/weekly-summary      | Get weekly workout stats   | `[{ day, totalVolume, totalSets, ... }]`|
+| GET    | /api/stats/monthly-summary     | Get monthly workout stats  | `[{ week, totalVolume, ... }]`          |
+| GET    | /api/stats/performance-metrics | Get performance metrics    | `{ totalWorkouts, volumeChange, ... }`  |
 
 ## Authentication Flow
 
@@ -187,14 +287,6 @@ npm start
 npm run dev
 ```
 
-### Password Reset Utility
-If you need to reset a user's password:
-1. Modify the `reset-password.js` script with the target email
-2. Run the script:
-```bash
-node reset-password.js
-```
-
 ## Development Guidelines
 
 ### Code Style
@@ -212,6 +304,12 @@ node reset-password.js
 - Implement proper indexing for frequently queried fields
 - Use data validation at the model level
 - Implement proper error handling for database operations
+
+### API Structure
+- Follow RESTful conventions
+- Group related endpoints under logical route paths
+- Use middleware for common functionality like authentication
+- Implement proper error handling and responses
 
 ## Deployment
 
@@ -259,4 +357,4 @@ This project is proprietary and confidential. Unauthorized copying, distribution
 
 ---
 
-*Documentation last updated: March 17, 2025*
+*Documentation last updated: March 18, 2025*
