@@ -1,5 +1,6 @@
-// backend/controllers/exercise.js
+// controllers/exercise.js
 const Exercise = require('../models/Exercise');
+const mongoose = require('mongoose');
 
 // Default exercises to seed
 const defaultExercises = [
@@ -48,7 +49,7 @@ const defaultExercises = [
 // Seed default exercises if none exist
 const seedDefaultExercises = async () => {
     try {
-        const count = await Exercise.countDocuments();
+        const count = await Exercise.countDocuments({ isDefault: true });
         if (count === 0) {
             await Exercise.insertMany(defaultExercises);
             console.log('Default exercises seeded successfully');
@@ -58,76 +59,141 @@ const seedDefaultExercises = async () => {
     }
 };
 
-// Get all exercises
-exports.getExercises = async (req, res) => {
+// Get all exercises - now filtered by user
+exports.getExercises = async (req, res, next) => {
     try {
-        // First check if we need to seed default exercises
         await seedDefaultExercises();
-
-        // Then get all exercises
-        const exercises = await Exercise.find();
+        
+        // Get default exercises OR exercises created by this user
+        const exercises = await Exercise.find({
+            $or: [
+                { isDefault: true },
+                { userId: req.user.id }
+            ]
+        });
+        
         res.status(200).json(exercises);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching exercises', error: error.message });
+        next(error);
     }
 };
 
-// Get single exercise
-exports.getExercise = async (req, res) => {
+// Get single exercise - verify ownership or default
+exports.getExercise = async (req, res, next) => {
     try {
-        const exercise = await Exercise.findById(req.params.id);
+        const exerciseId = new mongoose.Types.ObjectId(req.params.id);
+        const exercise = await Exercise.findById(exerciseId);
+        
         if (!exercise) {
             return res.status(404).json({ message: 'Exercise not found' });
         }
+        
+        // Check if exercise is default or belongs to user
+        if (!exercise.isDefault && (!exercise.userId || exercise.userId.toString() !== req.user.id)) {
+            return res.status(403).json({ message: 'Not authorized to access this exercise' });
+        }
+        
         res.status(200).json(exercise);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching exercise', error: error.message });
+        if (error.name === 'CastError' && error.kind === 'ObjectId') {
+            return res.status(400).json({ message: 'Invalid exercise ID format' });
+        }
+        next(error);
     }
 };
 
-// Create new exercise
-exports.createExercise = async (req, res) => {
+// Create new exercise - now associates with user
+exports.createExercise = async (req, res, next) => {
     try {
-        const exercise = await Exercise.create(req.body);
+        // Add current user id to exercise data
+        const exerciseData = {
+            ...req.body,
+            userId: req.user.id
+        };
+        
+        const exercise = await Exercise.create(exerciseData);
         res.status(201).json(exercise);
     } catch (error) {
-        res.status(500).json({ message: 'Error creating exercise', error: error.message });
+        // Handle unique constraint violation
+        if (error.code === 11000) {
+            return res.status(400).json({ 
+                message: 'You already have an exercise with this name. Please use a different name.' 
+            });
+        }
+        next(error);
     }
 };
 
-// Update exercise
-exports.updateExercise = async (req, res) => {
+// Update exercise - verify ownership
+exports.updateExercise = async (req, res, next) => {
     try {
-        const exercise = await Exercise.findByIdAndUpdate(
-            req.params.id,
+        const exerciseId = new mongoose.Types.ObjectId(req.params.id);
+        const exercise = await Exercise.findById(exerciseId);
+        
+        if (!exercise) {
+            return res.status(404).json({ message: 'Exercise not found' });
+        }
+        
+        // Prevent updating default exercises' key properties
+        if (exercise.isDefault) {
+            // Allow only description updates for default exercises
+            const allowedUpdates = ['description'];
+            const requestedUpdates = Object.keys(req.body);
+            
+            const isValidUpdate = requestedUpdates.every(update => allowedUpdates.includes(update));
+            
+            if (!isValidUpdate) {
+                return res.status(400).json({ 
+                    message: 'Cannot modify core properties of default exercises. Only description can be updated.' 
+                });
+            }
+        } else {
+            // For custom exercises, verify user owns this exercise
+            if (!exercise.userId || exercise.userId.toString() !== req.user.id) {
+                return res.status(403).json({ message: 'Not authorized to update this exercise' });
+            }
+        }
+        
+        const updatedExercise = await Exercise.findByIdAndUpdate(
+            exerciseId,
             req.body,
             { new: true, runValidators: true }
         );
-        if (!exercise) {
-            return res.status(404).json({ message: 'Exercise not found' });
-        }
-        res.status(200).json(exercise);
+        
+        res.status(200).json(updatedExercise);
     } catch (error) {
-        res.status(500).json({ message: 'Error updating exercise', error: error.message });
+        if (error.name === 'CastError' && error.kind === 'ObjectId') {
+            return res.status(400).json({ message: 'Invalid exercise ID format' });
+        }
+        next(error);
     }
 };
 
-// Delete exercise
-exports.deleteExercise = async (req, res) => {
+// Delete exercise - verify ownership
+exports.deleteExercise = async (req, res, next) => {
     try {
-        const exercise = await Exercise.findById(req.params.id);
+        const exerciseId = new mongoose.Types.ObjectId(req.params.id);
+        const exercise = await Exercise.findById(exerciseId);
+
         if (!exercise) {
             return res.status(404).json({ message: 'Exercise not found' });
         }
-        
-        // Prevent deletion of default exercises
+
         if (exercise.isDefault) {
             return res.status(400).json({ message: 'Cannot delete default exercises' });
         }
-        
-        await exercise.remove();
+
+        // Verify user owns this exercise
+        if (!exercise.userId || exercise.userId.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'Not authorized to delete this exercise' });
+        }
+
+        await Exercise.findByIdAndDelete(exerciseId);
         res.status(200).json({ message: 'Exercise deleted successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Error deleting exercise', error: error.message });
+        if (error.name === 'CastError' && error.kind === 'ObjectId') {
+            return res.status(400).json({ message: 'Invalid exercise ID format' });
+        }
+        next(error);
     }
 };
