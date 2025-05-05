@@ -11,7 +11,12 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+
+// Updated CORS configuration for deployment
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*', // Allow requests from specified frontend or any origin as fallback
+  credentials: true
+}));
 
 // Connect to MongoDB with updated options
 mongoose.connect(process.env.MONGO_URI, {
@@ -35,6 +40,11 @@ mongoose.connection.on('error', err => {
 
 mongoose.connection.on('connected', () => {
     console.log('MongoDB connected successfully');
+});
+
+// Add a simple health check route for deployment platforms
+app.get('/', (req, res) => {
+    res.status(200).json({ message: 'WE GO JIM API is running' });
 });
 
 // Routes
