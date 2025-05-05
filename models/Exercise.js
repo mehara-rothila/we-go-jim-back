@@ -1,9 +1,11 @@
 // models/Exercise.js
+const mongoose = require('mongoose');
+
 const exerciseSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
-        // Remove unique constraint since different users can create exercises with same name
+        unique: true
     },
     category: {
         type: String,
@@ -26,12 +28,9 @@ const exerciseSchema = new mongoose.Schema({
     isDefault: {
         type: Boolean,
         default: false
-    },
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        // Only required for custom exercises
     }
 }, {
     timestamps: true
 });
+
+module.exports = mongoose.model('Exercise', exerciseSchema);
