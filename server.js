@@ -20,8 +20,6 @@ app.use(cors({
 
 // Connect to MongoDB with updated options
 mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
 })
