@@ -50,6 +50,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/schedules', require('./routes/schedule'));
 app.use('/api/stats', require('./routes/stats'));
 app.use('/api/exercises', require('./routes/exercise'));
+app.use('/api/workout-sessions', require('./routes/workoutSession'));
 
 // Error handling middleware
 app.use(errorHandler);
@@ -59,3 +60,8 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
+
+
+
+
