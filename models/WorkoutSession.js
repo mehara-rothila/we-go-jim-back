@@ -31,6 +31,11 @@ const loggedExerciseSchema = new mongoose.Schema({
         required: true
     },
     sets: [loggedSetSchema],
+    weightUnit: {
+        type: String,
+        enum: ['kg', 'lbs'],
+        default: 'kg'
+    },
     notes: {
         type: String,
         default: ''

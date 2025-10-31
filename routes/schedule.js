@@ -52,7 +52,8 @@ router.put('/:id', protect, async (req, res) => {
         await schedule.save();
         res.json(schedule);
     } catch (error) {
-        res.status(500).json({ message: 'Error updating schedule' });
+        console.error('Error updating schedule:', error);
+        res.status(500).json({ message: 'Error updating schedule', error: error.message });
     }
 });
 
